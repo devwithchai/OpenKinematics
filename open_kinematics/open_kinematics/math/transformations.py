@@ -81,16 +81,16 @@ def translation(x: float, y: float, z: float) -> np.ndarray:
     ])
 
 # Homogeneous Transformation Matrix
-def homogeneous_transform(r: np.ndarray, p: np.ndarray) -> np.ndarray:
+def homogeneous_transform(R: np.ndarray, p: np.ndarray) -> np.ndarray:
     """
     Construct a homogeneous transformation matrix from rotation and translation.
-    :param r: A 3x3 rotation matrix.
+    :param R: A 3x3 rotation matrix.
     :param p: A translation vector of shape (3,) or (3,1).
     :return: 4x4 numpy.ndarray
     """
-    if not isinstance(r, np.ndarray):
+    if not isinstance(R, np.ndarray):
         raise TypeError('R must be a numpy.ndarray.')
-    if r.shape != (3,3):
+    if R.shape != (3,3):
         raise ValueError('R must be a 3x3 rotation matrix.')
 
     if not isinstance(p, np.ndarray):
@@ -101,8 +101,8 @@ def homogeneous_transform(r: np.ndarray, p: np.ndarray) -> np.ndarray:
     elif p.shape != (3,1):
         raise ValueError('p must have shape (3,) or (3,1).')
 
-    t = np.eye(4)
-    t[:3, :3] = r
-    t[:3, 3] = p.flatten()
+    T = np.eye(4)
+    T[:3, :3] = R
+    T[:3, 3] = p.flatten()
 
-    return t
+    return T
