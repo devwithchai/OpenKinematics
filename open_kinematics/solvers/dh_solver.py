@@ -1,7 +1,6 @@
 import numpy as np
-
-from open_kinematics.open_kinematics.math.matrix_ops import identity_matrix
-
+from open_kinematics.math.matrix_ops import identity_matrix
+from open_kinematics.solvers.base_solver import BaseSolver
 
 def dh_transform(theta: float, d: float, r: float, alpha: float) -> np.ndarray:
     """
@@ -36,7 +35,7 @@ def dh_transform(theta: float, d: float, r: float, alpha: float) -> np.ndarray:
 
     return T
 
-def forward_kinematics(dh_table: list[tuple]) -> np.ndarray:
+def forward_kinematics(dh_table: list[tuple], return_all: bool=False):
     """
     Compute the forward kinematics for a serial manipulator using the
     Denavit-Hartenberg (DH) convention.
@@ -57,6 +56,7 @@ def forward_kinematics(dh_table: list[tuple]) -> np.ndarray:
         raise TypeError("dh_table must be a list or tuple of DH parameter tuples.")
 
     T_total = identity_matrix(4)
+    transforms = []
 
     for parameters in dh_table:
         if len(parameters) != 4:
@@ -64,5 +64,16 @@ def forward_kinematics(dh_table: list[tuple]) -> np.ndarray:
 
         T = dh_transform(*parameters)
         T_total = T_total @ T
+        transforms.append(T_total.copy())
+
+    if return_all:
+        return transforms
 
     return T_total
+
+class DHSolver(BaseSolver):
+    def forward(self, dh_table, joint_values) -> np.ndarray:
+        updated_dh_table = [(theta_offset+joint, d, r, alpha) for (theta_offset, d, r, alpha), joint in zip(dh_table, joint_values)]
+        return  forward_kinematics(updated_dh_table)
+    def inverse(self, target_pose, initial_guess) -> list:
+        raise NotImplementedError("DHSolver does not support inverse kinematics. Use GeometricIKSolver or JacobianSolver instead.")
