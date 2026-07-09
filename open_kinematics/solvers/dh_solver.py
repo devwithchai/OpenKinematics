@@ -39,6 +39,7 @@ def forward_kinematics(dh_table: list[tuple], return_all: bool=False):
     """
     Compute the forward kinematics for a serial manipulator using the
     Denavit-Hartenberg (DH) convention.
+    :param return_all:
     :param dh_table: A list of DH parameter tuples, each of the form (theta, d, r, alpha).
         - theta : float
             Joint angle (rotation about Z-axis), in radians.

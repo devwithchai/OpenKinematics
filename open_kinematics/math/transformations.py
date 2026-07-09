@@ -2,7 +2,7 @@ import numpy as np
 """
 A homogeneous transform represents:
 Rotation (3 x 3)
-Translation (4 x 4)
+Translation (3 x 1)
 Combined into a single 4×4 matrix
 
 Rules:
