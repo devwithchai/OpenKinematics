@@ -1,5 +1,6 @@
 from open_kinematics.solvers.dh_solver import forward_kinematics
-from open_kinematics.exceptions import JointLimitViolation
+from open_kinematics.exceptions import JointLimitViolation, InvalidDHParameters
+
 
 class BaseRobot:
     def __init__(self, dh_parameters: list[tuple], joint_types: list[str], joint_limits: list[tuple]):
@@ -23,6 +24,7 @@ class BaseRobot:
     def forward_kinematics(self, joint_values: list[float], return_all=False):
         """
         Compute forward kinematics using the robot's stored DH parameters.
+        :param return_all:
         :param joint_values: List of joint angles (radians)
         :return: 4x4 homogeneous transformation matrix
         """
@@ -35,7 +37,14 @@ class BaseRobot:
 
         self.check_joint_limits(joint_values)
 
-        updated_dh_table = [(theta_offset+joint, d, r, alpha) for (theta_offset, d, r, alpha), joint in zip(self.dh_parameters, joint_values)]
+        updated_dh_table = []
+        for (theta_offset, d, r, alpha), joint, joint_type in zip(self.dh_parameters, joint_values, self.joint_types):
+            if joint_type == 'revolute':
+                updated_dh_table.append((theta_offset+joint, d, r, alpha))
+            elif joint_type == 'prismatic':
+                updated_dh_table.append((theta_offset, d+joint, r, alpha))
+            else:
+                raise InvalidDHParameters
         return forward_kinematics(updated_dh_table, return_all=return_all)
 
     def check_joint_limits(self, joint_values):
