@@ -45,3 +45,50 @@ def manipulability(J: np.ndarray) -> float:
 
     w = np.sqrt(np.maximum(np.linalg.det(J @ J.T), 0.0))
     return w
+
+def pose_error(T_current: np.ndarray, T_target: np.ndarray) -> np.ndarray:
+    """
+    inputs: two 4x4 homogeneous tranforms
+    output: a (6,) NumPy array, rows 0-2 = linear position error, rows 3-5 = angular (axis-angle) error.
+
+    Orientation error is represented as an axis-angle vector
+    (theta * axis).
+
+    Assumes the relative rotation is not exactly π radians.
+    The axis-angle extraction becomes singular at θ = π and is
+    intentionally left unhandled because this helper is intended
+    for iterative Jacobian IK with small corrective steps.
+    """
+
+    validate_matrix_shape(T_current, (4, 4))
+    validate_matrix_shape(T_target, (4, 4))
+
+    p_current = T_current[:3, 3]
+    p_target = T_target[:3, 3]
+
+    delta_p = p_target - p_current
+
+    R_current = T_current[:3, :3]
+    R_target = T_target[:3, :3]
+
+    R_err = R_target @ R_current.T
+
+    trace = np.trace(R_err)
+
+    cos_theta = np.clip((trace - 1.0) / 2.0, -1.0,1.0)
+    theta = np.arccos(cos_theta)
+
+    epsilon = 1e-9
+
+    if theta < epsilon:
+        delta_omega = np.zeros(3)
+    else:
+        axis = ((1.0 / (2.0 * np.sin(theta)))
+                * np.array([
+            R_err[2,1] - R_err[1,2],
+            R_err[0,2] - R_err[2,0],
+            R_err[1,0] - R_err[0,1],
+        ]))
+        delta_omega = theta * axis
+
+    return np.concatenate([delta_p, delta_omega])
