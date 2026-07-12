@@ -1,6 +1,7 @@
 import math
-from open_kinematics.exceptions import IKNoSolution
 import numpy as np
+from open_kinematics.exceptions import IKNoSolution
+from open_kinematics.robots.scara import ScaraRobot
 
 def planar_2r_ik(l1: float, l2: float, x: float, y: float):
     for value in (l1, l2, x, y):
@@ -28,3 +29,33 @@ def planar_2r_ik(l1: float, l2: float, x: float, y: float):
     theta1_down = math.atan2(y, x) - math.atan2(l2*np.sin(theta2_down), l1+l2*np.cos(theta2_down))
 
     return [(theta1_up, theta2_up), (theta1_down, theta2_down)]
+
+def scara_ik(robot: ScaraRobot, x: float, y: float, z: float, phi: float):
+    if not isinstance(robot, ScaraRobot):
+        raise TypeError("robot must be a ScaraRobot instance.")
+
+    for values in (x, y, z, phi):
+        if not isinstance(values, (int, float)):
+            raise TypeError("x, y, z, and phi must be numeric.")
+
+    l1, l2 = robot.link_lengths
+    d_min, d_max = robot.d_range
+
+    d = -z
+
+    epsilon = 1e-9
+
+    if d < d_min - epsilon or d > d_max + epsilon:
+        raise IKNoSolution(f"Target z={z} requires prismatic joint value "
+                           f"{d}, which is outside range ({d_min}, {d_max}).")
+
+    d = max(d_min, min(d, d_max))
+
+    planar_solutions = planar_2r_ik(l1=l1, l2=l2, x=x, y=y)
+    solutions = []
+    for theta1, theta2 in planar_solutions:
+        theta4 = theta1 + theta2 - phi
+        theta4 = math.atan2(math.sin(theta4), math.cos(theta4)) # Normalize to (-π, π)
+        solutions.append((theta1, theta2, d, theta4))
+
+    return solutions

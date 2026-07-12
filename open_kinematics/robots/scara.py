@@ -3,7 +3,7 @@ from open_kinematics.robots.base_robot import BaseRobot
 from open_kinematics.exceptions import InvalidDHParameters
 
 class ScaraRobot(BaseRobot):
-    def __init__(self, link_lengths: list[float], d_range: tuple[float]):
+    def __init__(self, link_lengths: list[float], d_range: list[float]):
 
         if (
             not isinstance(link_lengths, (list, tuple))
