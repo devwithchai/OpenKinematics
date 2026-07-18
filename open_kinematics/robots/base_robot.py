@@ -1,3 +1,4 @@
+import numpy as np
 from open_kinematics.solvers.dh_solver import forward_kinematics
 from open_kinematics.exceptions import JointLimitViolation, InvalidDHParameters
 
@@ -29,8 +30,8 @@ class BaseRobot:
         :return: 4x4 homogeneous transformation matrix
         """
 
-        if not isinstance(joint_values, (list, tuple)):
-            raise TypeError("joint_values must be a list or tuple.")
+        if not isinstance(joint_values, (list, tuple, np.ndarray)):
+            raise TypeError("joint_values must be a list, tuple or numpy.ndarray.")
 
         if len(joint_values) != self.num_joints:
             raise ValueError("Number of joint values must match number of joints.")

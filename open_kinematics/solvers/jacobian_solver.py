@@ -1,6 +1,9 @@
+import warnings
 import numpy as np
-from open_kinematics.exceptions import InvalidDHParameters
+from open_kinematics.exceptions import InvalidDHParameters, SingularityWarning, IKNoSolution, JointLimitViolation
 from open_kinematics.math.matrix_ops import validate_matrix_shape, identity_matrix
+
+SINGULARITY_THRESHOLD = 1e-4
 
 def geometric_jacobian(transforms: list[np.ndarray], joint_types: list[str]):
     if (
@@ -92,3 +95,64 @@ def pose_error(T_current: np.ndarray, T_target: np.ndarray) -> np.ndarray:
         delta_omega = theta * axis
 
     return np.concatenate([delta_p, delta_omega])
+
+def pseudoinverse_ik(robot, target, q0, tol=1e-6, max_iter=1000, step_size=0.1):
+    """
+    Iterative Jacobian pseudoinverse inverse kinematics.
+
+    Solves inverse kinematics using the Jacobian pseudoinverse method.
+    Valid for robots with n ≥ 6 joints (full row-rank Jacobian required by the right pseudoinverse formula).
+    Lower-DOF robots should use geometric_ik.py instead.
+
+    Raises:
+        IKNoSolution:
+             - if convergence is not achieved within max_iter iterations,
+             - if a joint limit is exceeded during the iterative search,
+             - if the Jacobian becomes singular during pseudoinverse computation.
+    """
+    q = np.array(q0, dtype=float, copy=True)
+
+    for iteration in range(max_iter):
+        try:
+            transforms = robot.forward_kinematics(q, return_all=True)
+        except JointLimitViolation as e:
+            raise IKNoSolution("JointLimitViolation path") from e
+        T_current = transforms[-1]
+
+        delta_x = pose_error(T_current, target)
+
+        if np.linalg.norm(delta_x) < tol:
+            return list(q)
+
+        J = geometric_jacobian(transforms, robot.joint_types)
+
+        w = manipulability(J)
+
+        if w < SINGULARITY_THRESHOLD:
+            warnings.warn(
+                (
+                f"Near singular configuration at "
+                f"iteration {iteration}. "
+                f"Manipulability = {w:.6e}"
+                ),
+                SingularityWarning,
+            )
+
+        try:
+            J_pinv = (J.T @ np.linalg.inv(J @ J.T))
+        except np.linalg.LinAlgError as e:
+            raise IKNoSolution("LinAlgError path") from e
+
+        delta_q = J_pinv @ delta_x
+
+        q = q + step_size * delta_q
+
+    else:
+        raise IKNoSolution(
+            (
+                "Pseudoinverse IK did not converge "
+                f"within {max_iter} iterations. "
+                f"Final pose error norm = "
+                f"{np.linalg.norm(delta_x):.6e}"
+            )
+        )
