@@ -1,25 +1,20 @@
+"""
+Transformation matrix utilities for OpenKinematics.
+
+This module provides rotation matrices, translation matrices,
+and homogeneous transformation matrix construction.
+
+All angles are expressed in radians.
+"""
+
 import numpy as np
-"""
-A homogeneous transform represents:
-Rotation (3 x 3)
-Translation (3 x 1)
-Combined into a single 4×4 matrix
-
-Rules:
-Input angle in radians
-"""
-
-# Rotation Matrices -
-'''
-Rules:
-Input angle in radians
-'''
 
 def rot_x(theta: float) -> np.ndarray:
     """
     Rotation matrix about the X-axis.
     :param theta: Rotation angle in radians
-    :return: 3x3 numpy.ndarray
+    :return: 3x3 rotation matrix
+    :raises TypeError: If theta is not numeric.
     """
     if not isinstance(theta, (int, float)):
         raise TypeError('theta must be a numeric value in radians.')
@@ -34,7 +29,8 @@ def rot_y(theta: float) -> np.ndarray:
     """
     Rotation matrix about the Y-axis.
     :param theta: Rotation angle in radians
-    :return: 3x3 numpy.ndarray
+    :return: 3x3 rotation matrix
+    :raises TypeError: If theta is not numeric.
     """
     if not isinstance(theta, (int, float)):
         raise TypeError('theta must be a numeric value in radians.')
@@ -49,7 +45,8 @@ def rot_z(theta: float) -> np.ndarray:
     """
     Rotation matrix about the Z-axis.
     :param theta: Rotation angle in radians
-    :return: 3x3 numpy.ndarray
+    :return: 3x3 rotation matrix
+    :raises TypeError: If theta is not numeric.
     """
     if not isinstance(theta, (int, float)):
         raise TypeError('theta must be a numeric value in radians.')
@@ -67,7 +64,8 @@ def translation(x: float, y: float, z: float) -> np.ndarray:
     :param x: Translation along the X-axis.
     :param y: Translation along the Y-axis.
     :param z: Translation along the Z-axis.
-    :return: 4x4 numpy.ndarray
+    :return: 4x4 homogeneous translation matrix
+    :raises TypeError: If x, y, or z is not numeric.
     """
     for value in (x, y, z):
         if not isinstance(value, (int, float)):
@@ -86,7 +84,9 @@ def homogeneous_transform(R: np.ndarray, p: np.ndarray) -> np.ndarray:
     Construct a homogeneous transformation matrix from rotation and translation.
     :param R: A 3x3 rotation matrix.
     :param p: A translation vector of shape (3,) or (3,1).
-    :return: 4x4 numpy.ndarray
+    :return: 4x4 homogeneous transformation matrix
+    :raises TypeError: If R or p is not a NumPy ndarray.
+    :raises ValueError: If R is not a 3x3 matrix or p does not have shape (3,) or (3,1).
     """
     if not isinstance(R, np.ndarray):
         raise TypeError('R must be a numpy.ndarray.')

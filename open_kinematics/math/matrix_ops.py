@@ -1,14 +1,20 @@
-import numpy as np
+"""
+Matrix utility functions for OpenKinematics.
 
+This module provides common matrix operations used throughout
+the library, including identity matrix creation, matrix shape
+validation, and safe matrix multiplication.
 """
-This module provides matrix utility functions to support 
-robotics and kinematics calculations.
-"""
+
+import numpy as np
 
 def identity_matrix(size: int=4) -> np.ndarray:
     """
-    Creates an identity matrix of a given size.
-    Default size is 4x4.
+    Create a square identity matrix.
+    :param size: Dimension of the identity matrix.
+    :return: A square identity matrix of shape (size, size).
+    :raises TypeError: If size is not an integer.
+    :raises ValueError: If size is less than 1.
     """
     # 1. Check if size is actually an integer
     if not isinstance(size, int):
@@ -22,7 +28,13 @@ def identity_matrix(size: int=4) -> np.ndarray:
 
 def validate_matrix_shape(matrix: np.ndarray, shape: tuple, name: str = "matrix") -> None:
     """
-    Validates that the input is a NumPy array and matches the expected shape.
+    Validate the shape of a NumPy matrix.
+    :param matrix: Matrix whose shape will be validated.
+    :param shape: Expected matrix shape.
+    :param name: Name used in generated error messages.
+    :return: None. Raises an exception if validation fails.
+    :raises TypeError: If matrix is not a NumPy ndarray.
+    :raises ValueError: If matrix does not have the expected shape.
     """
     # 1. Type Check: Ensure it is a NumPy array
     if not isinstance(matrix, np.ndarray):
@@ -34,7 +46,12 @@ def validate_matrix_shape(matrix: np.ndarray, shape: tuple, name: str = "matrix"
 
 def matmul(a: np.ndarray, b: np.ndarray) -> np.ndarray:
     """
-    Multiplies two 2D NumPy arrays after validating types and dimensions.
+    Multiply two matrices.
+    :param a: Left-hand matrix.
+    :param b: Right-hand matrix.
+    :return: Matrix product of a and b.
+    :raises TypeError: If either input is not a NumPy ndarray.
+    :raises ValueError: If either input is not two-dimensional, or if the matrix dimensions are incompatible for multiplication.
     """
     # 1. Type Check
     if not isinstance(a, np.ndarray) or not isinstance(b, np.ndarray):
