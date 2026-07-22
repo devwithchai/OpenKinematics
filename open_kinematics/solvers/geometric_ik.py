@@ -4,6 +4,24 @@ from open_kinematics.exceptions import IKNoSolution
 from open_kinematics.robots.scara import ScaraRobot
 
 def planar_2r_ik(l1: float, l2: float, x: float, y: float):
+    """
+    Compute the closed-form inverse kinematics of a 2R planar manipulator.
+
+    This solver computes the two possible joint configurations (elbow-up and elbow-down)
+    that place the end-effector at the requested Cartesian position.
+    Since only the end-effector position is specified, both configurations are valid solutions.
+
+    :param l1: Length of the first link.
+    :param l2: Length of the second link.
+    :param x: Desired X-coordinate of the end-effector.
+    :param y: Desired Y-coordinate of the end-effector.
+    :return: A list containing two inverse-kinematics solutions represented as``(theta1, theta2)`` tuples.
+        The first solution corresponds to the elbow-up configuration
+        and the second corresponds to the elbow-down configuration.
+    :raises TypeError: If any input parameter is not numeric.
+    :raises ValueError: If either link length is less than or equal to zero.
+    :raises IKNoSolution: If the requested Cartesian position lies outside the robot's reachable workspace.
+    """
     for value in (l1, l2, x, y):
         if not isinstance(value, (int, float)):
             raise TypeError
@@ -31,6 +49,21 @@ def planar_2r_ik(l1: float, l2: float, x: float, y: float):
     return [(theta1_up, theta2_up), (theta1_down, theta2_down)]
 
 def scara_ik(robot: ScaraRobot, x: float, y: float, z: float, phi: float):
+    """
+    Compute the closed-form inverse kinematics of a SCARA robot.
+
+    This solver computes all valid joint configurations that satisfy the requested end-effector position and orientation.
+    Unlike the planar 2R solver, this solver simultaneously satisfies the requested Cartesian position and end-effector orientation.
+
+    :param robot: The ScaraRobot instance whose geometric parameters are used for the inverse kinematics calculation.
+    :param x: Desired X-coordinate of the end-effector.
+    :param y: Desired Y-coordinate of the end-effector.
+    :param z: Desired Z-coordinate of the end-effector.
+    :param phi: Desired end-effector orientation about the Z-axis, in radians.
+    :return: A list containing two inverse-kinematics solutions represented as ``(theta1, theta2, d3, theta4)`` tuples.
+    :raises TypeError: If the robot is not a ScaraRobot instance or if any Cartesian pose parameter is not numeric.
+    :raises IKNoSolution: If the requested pose cannot be reached within the robot's prismatic joint limits or lies outside the planar workspace.
+    """
     if not isinstance(robot, ScaraRobot):
         raise TypeError("robot must be a ScaraRobot instance.")
 

@@ -6,15 +6,12 @@ def dh_transform(theta: float, d: float, r: float, alpha: float) -> np.ndarray:
     """
     Compute the standard Denavit-Hartenberg (DH) homogeneous transformation matrix.
 
-    The DH convention is widely used in robotics to represent the relationship
-    between successive coordinate frames in a kinematic chain.
-
-    :param theta: Joint angle (rotation about the Z-axis), in radians.
+    :param theta: Joint angle (rotation about the Z-axis) in radians.
     :param d: Link offset (translation along the Z-axis).
     :param r: Link length (translation along the X-axis).
     :param alpha: Link twist (rotation about the X-axis), in radians.
-    :return: A 4x4 homogeneous transformation matrix representing the pose of one
-        link relative to the previous link.
+    :return: A 4x4 homogeneous transformation matrix representing the transformation between two consecutive coordinate frames.
+    :raises TypeError: If any DH parameter is not numeric.
     """
 
     for value in (theta, d, r, alpha):
@@ -37,20 +34,15 @@ def dh_transform(theta: float, d: float, r: float, alpha: float) -> np.ndarray:
 
 def forward_kinematics(dh_table: list[tuple], return_all: bool=False):
     """
-    Compute the forward kinematics for a serial manipulator using the
-    Denavit-Hartenberg (DH) convention.
-    :param return_all:
-    :param dh_table: A list of DH parameter tuples, each of the form (theta, d, r, alpha).
-        - theta : float
-            Joint angle (rotation about Z-axis), in radians.
-        - d : float
-            Link offset (translation along Z-axis).
-        - r : float
-            Link length (translation along X-axis).
-        - alpha : float
-            Link twist (rotation about X-axis), in radians.
-    :return: A 4x4 homogeneous transformation matrix representing the pose of the
-        end-effector relative to the base frame.
+    Compute the forward kinematics for a serial manipulator using (DH) convention.
+
+    :param dh_table: Sequence of DH parameter dictionaries describing the robot.
+    :param return_all: If True, return every intermediate transformation matrix.
+        Otherwise, return only the end-effector transformation.
+    :return: The end-effector homogeneous transformation matrix when ``return_all`` is False.
+        Otherwise, a list containing the cumulative homogeneous transformation matrix after each joint.
+    :raises TypeError: If any DH parameter is not numeric.
+    :raises ValueError: If DH parameters are not 4.
     """
 
     if not isinstance(dh_table, (list, tuple)):
@@ -72,9 +64,28 @@ def forward_kinematics(dh_table: list[tuple], return_all: bool=False):
 
     return T_total
 
+
 class DHSolver(BaseSolver):
+
     def forward(self, dh_table, joint_values) -> np.ndarray:
+        """
+        Compute forward kinematics using the Denavit-Hartenberg convention.
+
+        :param dh_table: DH parameter table describing the robot geometry.
+        :param joint_values: Joint values added to the corresponding DH joint-angle offsets.
+        :return: End-effector pose as a 4x4 homogeneous transformation matrix.
+        """
         updated_dh_table = [(theta_offset+joint, d, r, alpha) for (theta_offset, d, r, alpha), joint in zip(dh_table, joint_values)]
         return  forward_kinematics(updated_dh_table)
+
     def inverse(self, target_pose, initial_guess) -> list:
+        """
+        Inverse kinematics is not implemented by the generic DH solver.
+
+        :param target_pose: Desired end-effector pose.
+        :param initial_guess: Initial joint configuration.
+        :return: This method does not return a value.
+        :raises NotImplementedError: Always raised because inverse kinematics is robot-specific and must
+            be implemented by specialized solver classes.
+        """
         raise NotImplementedError("DHSolver does not support inverse kinematics. Use GeometricIKSolver or JacobianSolver instead.")
