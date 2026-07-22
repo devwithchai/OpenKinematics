@@ -139,9 +139,9 @@ def pseudoinverse_ik(robot, target, q0, tol=1e-6, max_iter=1000, step_size=0.1):
     :param robot: Robot model providing forward kinematics and joint information.
     :param target: Desired end-effector homogeneous transformation matrix.
     :param q0: Initial joint configuration used as the starting point of the iterative optimization.
-    :param tol: Pose-error convergence tolerance.
-    :param max_iter: Maximum number of solver iterations.
-    :param step_size: Step-size scaling factor applied to each joint update.
+    :param tol: Pose-error convergence tolerance (default: ``1e-6``).
+    :param max_iter: Maximum number of solver iterations (default: ``1000``).
+    :param step_size: Jacobian update step size (default: ``0.1``).
     :return: Joint configuration that satisfies the requested pose within the specified tolerance.
     :raises IKNoSolution: If a valid solution cannot be obtained because the solver fails to converge,
         a joint limit is violated, or the Jacobian cannot be inverted during the iterative solution process.

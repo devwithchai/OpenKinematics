@@ -36,13 +36,13 @@ def forward_kinematics(dh_table: list[tuple], return_all: bool=False):
     """
     Compute the forward kinematics for a serial manipulator using (DH) convention.
 
-    :param dh_table: Sequence of DH parameter dictionaries describing the robot.
+    :param dh_table: Sequence of DH parameter tuples, each of the form (theta, d, r, alpha).
     :param return_all: If True, return every intermediate transformation matrix.
         Otherwise, return only the end-effector transformation.
     :return: The end-effector homogeneous transformation matrix when ``return_all`` is False.
         Otherwise, a list containing the cumulative homogeneous transformation matrix after each joint.
-    :raises TypeError: If any DH parameter is not numeric.
-    :raises ValueError: If DH parameters are not 4.
+    :raises TypeError: If ``dh_table`` is not a list or tuple, or if any DH parameter within the table is not numeric.
+    :raises ValueError: If any DH parameter tuple does not contain exactly four values.
     """
 
     if not isinstance(dh_table, (list, tuple)):
@@ -66,6 +66,14 @@ def forward_kinematics(dh_table: list[tuple], return_all: bool=False):
 
 
 class DHSolver(BaseSolver):
+    """
+    Concrete forward kinematics solver based on the Denavit-Hartenberg
+    convention.
+
+    This solver computes forward kinematics from a DH parameter table.
+    Inverse kinematics is intentionally left unimplemented because it is
+    robot-specific.
+    """
 
     def forward(self, dh_table, joint_values) -> np.ndarray:
         """
@@ -74,6 +82,8 @@ class DHSolver(BaseSolver):
         :param dh_table: DH parameter table describing the robot geometry.
         :param joint_values: Joint values added to the corresponding DH joint-angle offsets.
         :return: End-effector pose as a 4x4 homogeneous transformation matrix.
+        :raises TypeError: Propagated if the DH table is invalid or contains non-numeric parameters.
+        :raises ValueError: Propagated if the DH table contains malformed parameter tuples.
         """
         updated_dh_table = [(theta_offset+joint, d, r, alpha) for (theta_offset, d, r, alpha), joint in zip(dh_table, joint_values)]
         return  forward_kinematics(updated_dh_table)
