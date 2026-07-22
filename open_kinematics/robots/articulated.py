@@ -3,7 +3,23 @@ from open_kinematics.robots.base_robot import BaseRobot
 from open_kinematics.exceptions import InvalidDHParameters
 
 class ArticulatedRobot(BaseRobot):
+    """
+    Represents a generic articulated serial robot manipulator.
+
+    The robot is constructed directly from a user-supplied DH parameter table.
+    The constructor validates the table and converts each parameter dictionary into the tuple representation used internally.
+    Forward kinematics and joint-limit validation are inherited from ``BaseRobot``.
+    """
+
     def __init__(self, dh_table: list[dict]):
+        """
+        Construct an articulated robot from a Denavit-Hartenberg table.
+
+        :param dh_table: Sequence of dictionaries containing the keys ``theta``, ``d``, ``r``, and ``alpha``.
+        :return: None.
+        :raises InvalidDHParameters: If ``dh_table`` is not a list or tuple, is empty, contains non-dictionary rows,
+            contains missing or unexpected keys, or contains non-numeric parameter values.
+        """
 
         if not isinstance(dh_table, (list, tuple)):
             raise InvalidDHParameters("dh_table must be a list of dicts.")
@@ -30,6 +46,17 @@ class ArticulatedRobot(BaseRobot):
         super().__init__(dh_parameters=dh_parameters, joint_types=self.joint_types, joint_limits=self.joint_limits)
 
     def get_joint_positions(self, joint_values):
+        """
+        Compute the Cartesian position of every joint in the robot.
+
+        :param joint_values: Joint values defining the robot configuration.
+        :return: A list of ``[x, y, z]`` coordinates representing the base followed by every joint position.
+            Intended primarily for visualization.
+        :raises TypeError: Propagated from ``forward_kinematics()`` if ``joint_values`` is not a list, tuple, or NumPy array.
+        :raises ValueError: Propagated from ``forward_kinematics()`` if the number of supplied joint values does not match the robot's joint count.
+        :raises JointLimitViolation: Propagated from ``forward_kinematics()`` if any joint value exceeds its configured limits.
+        """
+
         transform = self.forward_kinematics(joint_values, return_all=True)
         result_list = [[0.0, 0.0, 0.0]]
         for T in transform:
