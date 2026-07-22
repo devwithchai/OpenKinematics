@@ -1,16 +1,56 @@
 [build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
-name = "open_kinematics"
+name = "openkinematics"
 version = "0.1.0"
-description = "A modular, educational robotics kinematics library."
+description = "Educational robot kinematics library built from first principles."
+readme = "README.md"
 requires-python = ">=3.10"
-dependencies = [
-    "numpy>=1.24"
+license = "MIT"
+license-files = ["LICENSE"]
+
+authors = [
+    { name = "Chaitanya Belekar", email = "chaitanyabelekar18@gmail.com" }
 ]
 
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["open_kinematics*"]
+dependencies = [
+    "numpy>=1.24",
+    "matplotlib>=3.7",
+]
+
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+]
+
+keywords = [
+    "robotics",
+    "kinematics",
+    "inverse-kinematics",
+    "forward-kinematics",
+    "jacobian",
+    "dh-parameters",
+    "education",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/devwithchai/OpenKinematics"
+Repository = "https://github.com/devwithchai/OpenKinematics"
+Issues = "https://github.com/devwithchai/OpenKinematics/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["open_kinematics"]
