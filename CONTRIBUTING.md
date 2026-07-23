@@ -160,8 +160,6 @@ software as well as experienced developers.
 
 ## Project Architecture
 
-## Project Architecture
-
 OpenKinematics follows a layered architecture.
 
 ```text
@@ -212,7 +210,7 @@ DH parameters are always ordered as:
 Contributors should follow these conventions consistently:
 
 - Angles are expressed in **radians**.
-- Homogeneous transformations are represented by **4×4 NumPy arrays**.
+- Homogeneous transformations are represented by **4x4 NumPy arrays**.
 - Robot implementations should remain consistent with the existing DH
   parameter ordering and transformation conventions.
 
