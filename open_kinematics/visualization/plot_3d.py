@@ -5,10 +5,16 @@ from open_kinematics.robots.articulated import ArticulatedRobot
 
 def plot_3d(robot, joint_values, ax=None):
     """
-    :param robot: ArticulatedRobot instance
-    :param joint_values: Joint values
-    :param ax: Optional matplotlib 3D Axes
-    :return: (Figure, Axes)
+    Visualize an articulated robot configuration in three dimensions.
+
+    :param robot: ArticulatedRobot instance to visualize.
+    :param joint_values: Joint values describing the robot configuration.
+    :param ax: Existing Matplotlib axes to draw on. If ``None``, a new figure and axes are created.
+    :return: Tuple containing the Matplotlib figure and axes.
+    :raises TypeError: If ``robot`` is not an ``ArticulatedRobot`` instance, or propagated from ``forward_kinematics()``
+        if ``joint_values`` has an invalid type.
+    :raises ValueError: Propagated from ``forward_kinematics()`` if the number of supplied joint values is incorrect.
+    :raises JointLimitViolation: Propagated from ``forward_kinematics()`` if a joint exceeds its configured limits.
     """
 
     if not isinstance(robot, ArticulatedRobot):

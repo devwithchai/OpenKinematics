@@ -4,10 +4,16 @@ from open_kinematics.robots.scara import ScaraRobot
 
 def plot_2d(robot, joint_values, ax=None):
     """
-    :param robot: Robot object
-    :param joint_values: list | tuple | np.ndarray
-    :param ax: matplotlib.axes.Axes, optional
-    :return: (fig, ax)
+    Visualize a planar or SCARA robot configuration in two dimensions.
+
+    :param robot: PlanarRobot or ScaraRobot instance to visualize.
+    :param joint_values: Joint values describing the robot configuration.
+    :param ax: Existing Matplotlib axes to draw on. If ``None``, a new figure and axes are created.
+    :return: Tuple containing the Matplotlib figure and axes.
+    :raises TypeError: If ``robot`` is not a supported robot type, or propagated from ``get_joint_positions()``
+        if ``joint_values`` has an invalid type.
+    :raises ValueError: Propagated from ``get_joint_positions()`` if the number of supplied joint values is incorrect.
+    :raises JointLimitViolation: Propagated from ``get_joint_positions()`` if a joint exceeds its configured limits.
     """
 
     if not isinstance(robot, (PlanarRobot, ScaraRobot)):
